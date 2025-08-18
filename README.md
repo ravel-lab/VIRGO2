@@ -1,4 +1,4 @@
-# VIRGO2 (updated August 2025)
+# VIRGO2
 
 ## Overview
 
@@ -122,7 +122,7 @@ After running `taxonomy`, there will be a single comma-separated file with the t
 ### Annotation files and additional analyses 
 
 VIRGO2 contains the following gene annotation files that can be merged with the compiled mapped results using standard functions in `python` or `R`. An example script can be found in AccessoryScripts/VIRGO2_add_annotations.py.
-
+```
 -0.VIRGO2.geneLength.txt        :Length of each VIRGO2 gene
 -1.VIRGO2.taxon.txt             :Taxonomic annotation of each VIRGO2 gene
 -2.VIRGO2.taxonThresholds.txt   :Per taxon gene number thresholds used in estimated relative abundance
@@ -136,4 +136,4 @@ VIRGO2 contains the following gene annotation files that can be merged with the 
 -10.VIRGO2.phage.txt            :Bacteriophage annotations per VIRGO2 gene
 -11.VIRGO2.compound.txt         :Biosynthetic gene cluster annotations per VIRGO2 gene
 -VIRGO2_VOGkey.txt              :Per-species orthologous gene cluster assignment for VIRGO2 genes
-
+```
