@@ -16,8 +16,8 @@ VIRGO2 requires the following software to be install and in the PATH
 
 and the following python packages
 
--Pandas
--Numpy
+-pandas
+-numpy
 
 ## Installation
 
