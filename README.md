@@ -18,9 +18,6 @@ and the following python packages
 
 -Pandas
 -Numpy
--Argparse
--Subprocess
--os
 
 ## Installation
 
