@@ -9,6 +9,7 @@ VIRGO2 is a non-redudant catalog of genes from the human vaginal microbiome that
 
 VIRGO2 requires the following software to be install and in the PATH
 
+-git lfs
 -Gzip
 -Bowtie2
 -Samtools
@@ -21,7 +22,7 @@ and the following python packages
 
 ## Installation
 
-VIRGO2 can be install by cloning the repository and then unzipping the annotation and fasta files, and building the bowtie2 index from the provided fasta file. Once the repository is cloned, you should run the `VIRGO2.py` install command which will unzip the required files and build the bowtie2 index.
+VIRGO2 can be install by cloning the repository with git lfs installed and configured and then unzipping the annotation and fasta files, and building the bowtie2 index from the provided fasta file. Once the repository is cloned, you should run the `VIRGO2.py` install command which will unzip the required files and build the bowtie2 index.
 
 ```
 git clone https://github.com/ravel-lab/VIRGO2.git
@@ -30,6 +31,12 @@ cd VIRGO2
 
 python3 VIRGO2.py install
 
+```
+
+NOTE: installation will fail if 'git lfs' is not installed and configured. If you have already cloned the repository and need to add the large files after install and configuring 'git lfs', this can be accomplished by running the follow command in the repository directory.
+
+```
+git lfs pull
 ```
 
 ## Usage
