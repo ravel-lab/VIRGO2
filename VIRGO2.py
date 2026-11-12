@@ -173,7 +173,9 @@ if args.command == 'install':
             print(e.output)
 
     try:
-        subprocess.run(["bowtie2-build","-f","--seed","343","--threads",args.threads,"{path}FastaFiles/VIRGO2.fa".format(path=scriptLoc),"{}Index/VIRGO2".format(scriptLoc)])
+        subprocess.run(["bowtie2-build","-f","--seed","343",
+                        #"--threads",args.threads, --> is removed upstream
+                        "{path}FastaFiles/VIRGO2.fa".format(path=scriptLoc),"{}Index/VIRGO2".format(scriptLoc)])
     except subprocess.CalledProcessError as e:
         print(e.output)
 
