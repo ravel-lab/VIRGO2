@@ -36,21 +36,6 @@ try:
 except:
     print("Required package numpy not available")
     exit()
-try:
-    import argparse
-except:
-    print("Required package argparse not available")
-    exit()
-try:
-    import subprocess
-except:
-    print("Required package subprocess not available")
-    exit()
-try:
-    import os
-except:
-    print("Required package os not available")
-    exit()
 
 scriptLoc = os.path.realpath(__file__)
 scriptLoc = scriptLoc.split('VIRGO2.py')[0]
@@ -184,80 +169,66 @@ if args.command == 'install':
 
 #call functions for mapping
 if args.command == 'map':
+    bowtie2_command = [
+                    "bowtie2","-N","0","-L","20","-D","20","-R","3",
+                    "--sam-no-qname-trunc","--end-to-end","--seed","343",
+                    "--no-unal", "-p", str(args.threads), "-x", str(VIRGO2DB),
+                    "-U", str(args.reads),
+                    ]
 
     if args.cov=='1':
-        #####Mapping with coverage correction, DEFAULT
-        if args.bypass=='0':
-            try:
-                bowtie = subprocess.Popen([
-                    "bowtie2","-N","0","-L","20","-D","20","-R","3","-k","10",
-                    "--sam-no-qname-trunc","--end-to-end","--seed","343",
-                    "--no-unal", "-p", str(args.threads), "-x", str(VIRGO2DB), 
-                    "-U", str(args.reads),                    
-                    ], stdout=subprocess.PIPE)
+        bowtie_2_command.extend(["-k","10"])
 
-                #sorting sam file
-                sorted = subprocess.run([
+    #####Mapping with coverage correction, DEFAULT
+    if args.bypass=='0':
+        try:
+            bowtie = subprocess.Popen(bowtie_2_command, stdout=subprocess.PIPE)
+
+            #sorting sam file
+            sorted = subprocess.run([
                     "samtools","sort", "-o","{}.sorted.sam".format(args.outputPrefix), "-"], 
-                    stdin=bowtie.stdout, check=True)
-                bowtie.stdout.close()
-                bowtie.wait()
-                if bowtie.returncode != 0:
-                    raise subprocess.CalledProcessError(bowtie.returncode, bowtie.args)
-            except subprocess.CalledProcessError as e:
-                print(e.output)
+                    stdin = bowtie.stdout, check = True)
+            bowtie.stdout.close()
+            bowtie.wait()
+            if bowtie.returncode != 0:
+                raise subprocess.CalledProcessError(bowtie.returncode, bowtie.args)
+        except subprocess.CalledProcessError as e:
+            print(e.output)
         #generating gene level coverage values
-            try:
-                subprocess.run(['samtools','coverage',"{}.sorted.sam".format(args.outputPrefix),'-o',"{}.cov".format(args.outputPrefix)])
-            except subprocess.CalledProcessError as e:
-                print(e.output)
-
-        #####Viewing samfile to remove header
-            try:
-                #cut command prevents samtools from generating uneven number of columns for downstream read in pandas dataframe
-                subprocess.run('samtools view -S {}.sorted.sam | cut -f 1,3 > {}.noHead.sam'.format(args.outputPrefix, args.outputPrefix), shell=True)
-            
-                #subprocess.run(['samtools','view',"{}.sorted.sam".format(args.outputPrefix),'-o',"{}.noHead.sam".format(args.outputPrefix)])
-            except subprocess.CalledProcessError as e:
-                print(e.output)
-            garbageCollect('{}.sorted.sam'.format(args.outputPrefix))
-
-        samOut = covCorr("{}.noHead.sam".format(args.outputPrefix),"{}.cov".format(args.outputPrefix))
-        geneCounts = geneCounts(samOut)
-
-        geneCounts.to_csv("{}.out".format(args.outputPrefix),sep="\t")
-
-        #####Removing temporary files
-        files2del=['{}.sam'.format(args.outputPrefix),'{}.sorted.sam'.format(args.outputPrefix),"{}.cov".format(args.outputPrefix),"{}.noHead.sam".format(args.outputPrefix)]
-        garbageCollect('{}.noHead.sam'.format(args.outputPrefix))
-        garbageCollect('{}.cov'.format(args.outputPrefix))
-    elif args.cov=='0':
-        #mapping without coverage correction, WARNING inflates gene counts
         try:
-            subprocess.run(["bowtie2","-N","0","-L","20","-D","20","-R","3","--sam-no-qname-trunc","--end-to-end","--seed","343",
-                        "--no-unal","-p",args.threads,"-x",str(VIRGO2DB),"-U",args.reads,"-S","{}.sam".format(args.outputPrefix)])
+            subprocess.run([
+                'samtools','coverage',"{}.sorted.sam".format(args.outputPrefix), 
+                '-o', "{}.cov".format(args.outputPrefix)
+            ])
         except subprocess.CalledProcessError as e:
             print(e.output)
 
-        #sorting sam file
-        try:
-            subprocess.run(['samtools','sort','{}.sam'.format(args.outputPrefix),'-o','{}.sorted.sam'.format(args.outputPrefix)])
-        except subprocess.CalledProcessError as e:
-            print(e.output)
-        garbageCollect('{}.sam'.format(args.outputPrefix))
         #####Viewing samfile to remove header
         try:
-            subprocess.run(['samtools','view',"{}.sorted.sam".format(args.outputPrefix),'-o',"{}.noHead.sam".format(args.outputPrefix)])
-
+        #cut command prevents samtools from generating uneven number of columns for downstream read in pandas dataframe
+            samtools_view = subprocess.Popen([
+                'samtools', 'view', '-S', f'{args.outputPrefix}.sorted.sam'
+            ], stdout=subprocess.PIPE)
+            cut_header = subprocess.Popen([
+                'cut',  '-f', '1,3', '>',  f'{args.outputPrefix}.noHead.sam'
+            ], stdin = samtools_view.stdout, check = True)
+            samtools_view.stdout.close()
+            samtools_view.wait()
+            if samtools_view.returncode != 0:
+                raise subprocess.CalledProcessError(samtools_view.returncode, samtools_view.args)
         except subprocess.CalledProcessError as e:
             print(e.output)
         garbageCollect('{}.sorted.sam'.format(args.outputPrefix))
-        samOut = noCovCorr("{}.noHead.sam".format(args.outputPrefix))
-        geneCounts = geneCounts(samOut)
-        garbageCollect('{}.noHead.sam'.format(args.outputPrefix))
-        geneCounts.to_csv("{}.out".format(args.outputPrefix),sep="\t")
 
-        files2del=['{}.sam'.format(args.outputPrefix),'{}.sorted.sam'.format(args.outputPrefix),"{}.noHead.sam".format(args.outputPrefix)]
+    samOut = covCorr("{}.noHead.sam".format(args.outputPrefix),"{}.cov".format(args.outputPrefix))
+    geneCounts = geneCounts(samOut)
+
+    geneCounts.to_csv("{}.out".format(args.outputPrefix),sep="\t")
+
+    #####Removing temporary files
+    files2del=['{}.sam'.format(args.outputPrefix),'{}.sorted.sam'.format(args.outputPrefix),"{}.cov".format(args.outputPrefix),"{}.noHead.sam".format(args.outputPrefix)]
+    garbageCollect('{}.noHead.sam'.format(args.outputPrefix))
+    garbageCollect('{}.cov'.format(args.outputPrefix))
 
 #calls functions for compiling mapping results
 if args.command == 'compile':
