@@ -162,12 +162,12 @@ def main():
                     ]
 
         if args.cov=='1':
-            bowtie_2_command.extend(["-k","10"])
+            bowtie2_command.extend(["-k","10"])
 
     #####Mapping with coverage correction, DEFAULT
         if args.bypass=='0':
             try:
-                bowtie = subprocess.Popen(bowtie_2_command, stdout=subprocess.PIPE)
+                bowtie = subprocess.Popen(bowtie2_command, stdout=subprocess.PIPE)
 
                 sorted = subprocess.run([
                     "samtools","sort", "-o","{}.sorted.sam".format(args.outputPrefix), "-"], 
