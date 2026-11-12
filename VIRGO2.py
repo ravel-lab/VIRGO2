@@ -119,9 +119,6 @@ subparsers.required = True
 #subparser for install command
 parser_install = subparsers.add_parser('install')
 
-#bowtie2-build doesn't take threads
-#parser_install.add_argument('-p','--threads',help='Number of threads used in building index default:1',default='1',required=False)
-
 #subparser for mapping routine
 parser_map = subparsers.add_parser('map')
 
@@ -192,16 +189,21 @@ if args.command == 'map':
         #####Mapping with coverage correction, DEFAULT
         if args.bypass=='0':
             try:
-                subprocess.run(["bowtie2","-N","0","-L","20","-D","20","-R","3","-k","10","--sam-no-qname-trunc","--end-to-end","--seed","343",
-                        "--no-unal","-p",args.threads,"-x",str(VIRGO2DB),"-U",args.reads,"-S","{}.sam".format(args.outputPrefix)])
+                bowtie = subprocess.run([
+                    "bowtie2","-N","0","-L","20","-D","20","-R","3","-k","10",
+                    "--sam-no-qname-trunc","--end-to-end","--seed","343",
+                    "--no-unal", "-p", args.threads, "-x", str(VIRGO2DB), 
+                    "-U", args.reads, #"-S","{}.sam".format(args.outputPrefix)
+                    ], check=True, capture_output=True)
+
+                #sorting sam file
+                sorted = subprocess.run([
+                    'samtools','sort','-o','{}.sorted.sam'.format(args.outputPrefix)], 
+                    input=bowtie.stdout)
+                
             except subprocess.CalledProcessError as e:
                 print(e.output)
 
-            #sorting sam file
-            try:
-                subprocess.run(['samtools','sort','{}.sam'.format(args.outputPrefix),'-o','{}.sorted.sam'.format(args.outputPrefix)])
-            except subprocess.CalledProcessError as e:
-                print(e.output)
         #generating gene level coverage values
             garbageCollect('{}.sam'.format(args.outputPrefix))
 
