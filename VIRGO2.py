@@ -100,7 +100,7 @@ def garbageCollect(file2del):
         os.remove(file2del)
     except OSError as e:
         #Report failure to user
-        print("Expected temporary files not available to delete\nExpected Files: {}".format(files2del))
+        print("Expected temporary files not available to delete\nExpected Files: {}".format(file2del))
 
 
 ####Argument Parsing
@@ -189,24 +189,24 @@ if args.command == 'map':
         #####Mapping with coverage correction, DEFAULT
         if args.bypass=='0':
             try:
-                bowtie = subprocess.run([
+                bowtie = subprocess.Popen([
                     "bowtie2","-N","0","-L","20","-D","20","-R","3","-k","10",
                     "--sam-no-qname-trunc","--end-to-end","--seed","343",
-                    "--no-unal", "-p", args.threads, "-x", str(VIRGO2DB), 
-                    "-U", args.reads, #"-S","{}.sam".format(args.outputPrefix)
-                    ], check=True, capture_output=True)
+                    "--no-unal", "-p", str(args.threads), "-x", str(VIRGO2DB), 
+                    "-U", str(args.reads),                    
+                    ], stdout=subprocess.PIPE)
 
                 #sorting sam file
                 sorted = subprocess.run([
-                    'samtools','sort','-o','{}.sorted.sam'.format(args.outputPrefix)], 
-                    input=bowtie.stdout)
-                
+                    "samtools","sort", "-o","{}.sorted.sam".format(args.outputPrefix), "-"], 
+                    stdin=bowtie.stdout, check=True)
+                bowtie.stdout.close()
+                bowtie.wait()
+                if bowtie.returncode != 0:
+                    raise subprocess.CalledProcessError(bowtie.returncode, bowtie.args)
             except subprocess.CalledProcessError as e:
                 print(e.output)
-
         #generating gene level coverage values
-            garbageCollect('{}.sam'.format(args.outputPrefix))
-
             try:
                 subprocess.run(['samtools','coverage',"{}.sorted.sam".format(args.outputPrefix),'-o',"{}.cov".format(args.outputPrefix)])
             except subprocess.CalledProcessError as e:
