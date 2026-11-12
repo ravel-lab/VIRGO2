@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "VIRGO2"
+version = "1.0.0"
+description = "VIRGO2 is a non-redudant catalog of genes from the human vaginal microbiome that allows for rapid taxonomic and functional analysis of metagenomic/metatranscriptomic reads."
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+
+dependencies = [
+    "pandas",
+    "numpy",
+]
+
+[project.scripts]
+virgo2 = "cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
