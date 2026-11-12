@@ -9,16 +9,16 @@ VIRGO2 is a non-redudant catalog of genes from the human vaginal microbiome that
 
 VIRGO2 requires the following software to be install and in the PATH
 
--git lfs
--Gzip
--Bowtie2
--Samtools
--Python3 >v3.8
+- [git lfs](https://github.com/git-lfs/git-lfs)
+- gzip
+- bowtie2
+- samtools
+- python3 >v3.8
 
 and the following python packages
 
--pandas
--numpy
+- pandas
+- numpy
 
 ## Installation
 
