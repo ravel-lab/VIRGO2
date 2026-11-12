@@ -23,7 +23,7 @@ VIRGO2 can be install by cloning the repository with git lfs installed and confi
 git clone https://github.com/ravel-lab/VIRGO2.git
 
 cd VIRGO2
-pip install .
+pip install -e .
 virgo2 install
 
 ```
