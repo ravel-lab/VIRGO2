@@ -193,11 +193,12 @@ def main():
                 samtools_view = subprocess.Popen([
                     'samtools', 'view', '-S', f'{args.outputPrefix}.sorted.sam'
                 ], stdout=subprocess.PIPE)
-                cut_header = subprocess.run([
-                    'cut',  '-f', '1,3', '>',  f'{args.outputPrefix}.noHead.sam'
-                ], stdin = samtools_view.stdout, check = True)
-                samtools_view.stdout.close()
-                samtools_view.wait()
+                with open(f'{args.outputPrefix}.noHead.sam') as f:
+                    cut_header = subprocess.run([
+                        'cut',  '-f', '1,3'
+                    ], stdin = samtools_view.stdout, check = True, stdout=f)
+                    samtools_view.stdout.close()
+                    samtools_view.wait()
                 if samtools_view.returncode != 0:
                     raise subprocess.CalledProcessError(samtools_view.returncode, samtools_view.args)
             except subprocess.CalledProcessError as e:
