@@ -193,7 +193,7 @@ def main():
                 samtools_view = subprocess.Popen([
                     'samtools', 'view', '-S', f'{args.outputPrefix}.sorted.sam'
                 ], stdout=subprocess.PIPE)
-                cut_header = subprocess.Popen([
+                cut_header = subprocess.run([
                     'cut',  '-f', '1,3', '>',  f'{args.outputPrefix}.noHead.sam'
                 ], stdin = samtools_view.stdout, check = True)
                 samtools_view.stdout.close()
